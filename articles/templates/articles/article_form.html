@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if form.instance.pk %}Edit Story{% else %}Create Story{% endif %} | Nexus
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#0a0a0a',
+                        'secondary': '#1a1a1a',
+                        'accent': '#3a3a3a',
+                        'light': '#f5f5f5',
+                        'highlight': '#8b5cf6',
+                        'highlight-light': '#a78bfa',
+                        'border': '#2a2a2a',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e5e5e5;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .gradient-border {
+            position: relative;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 13px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(255, 255, 255, 0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e5e5e5;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 14px;
+            width: 100%;
+            color: #e5e5e5;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.05);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: rgba(229, 229, 229, 0.3);
+        }
+
+        textarea.input-field {
+            min-height: 200px;
+            resize: vertical;
+            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+        }
+
+        select.input-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a78bfa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .file-upload-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-zone:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .file-upload-zone.dragover {
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .character-counter {
+            font-size: 13px;
+            color: rgba(229, 229, 229, 0.4);
+            transition: color 0.2s ease;
+        }
+
+        .character-counter.warning {
+            color: #fbbf24;
+        }
+
+        .character-counter.danger {
+            color: #ef4444;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .slide-up {
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .text-balance {
+            text-wrap: balance;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 border-b border-white/5 bg-primary/95 backdrop-blur-md">
+        <div class="max-w-4xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="{% url 'articles:article_list' %}" class="flex items-center space-x-3 group">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center">
+                        <i class="fas fa-arrow-left text-white text-sm"></i>
+                    </div>
+                    <span class="text-light/80 group-hover:text-light transition-colors text-sm">Back</span>
+                </a>
+
+                <div class="text-lg font-medium">
+                    {% if form.instance.pk %}
+                    <span class="text-gradient">Edit Story</span>
+                    {% else %}
+                    <span class="text-gradient">Create Story</span>
+                    {% endif %}
+                </div>
+
+                <div class="w-8"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-6 py-8">
+        <!-- Form Card -->
+        <div class="gradient-border p-6 md:p-8 slide-up">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-pen text-white text-xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-light mb-2 text-balance">
+                    {% if form.instance.pk %}Edit Your Story{% else %}Share Your Story{% endif %}
+                </h1>
+                <p class="text-light/60 text-sm max-w-md mx-auto">
+                    {% if form.instance.pk %}
+                    Refine your narrative and make it even more impactful
+                    {% else %}
+                    Craft a story that inspires and connects with readers
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Error Messages -->
+            {% if form.errors %}
+            <div class="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 fade-in">
+                <div class="flex items-start space-x-3">
+                    <div class="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-exclamation text-red-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-red-300 mb-2 text-sm">Please review the following:</h4>
+                        <ul class="space-y-1 text-red-300/80 text-sm">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-red-400">•</span>
+                                        <span><strong class="font-medium">{{ field.label }}:</strong> {{ error }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li class="flex items-start space-x-2">
+                                    <span class="text-red-400">•</span>
+                                    <span>{{ error }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Form -->
+            <form method="post" enctype="multipart/form-data" class="space-y-6" id="article-form">
+                {% csrf_token %}
+
+                <!-- Title Field -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-light/80">
+                        Title
+                    </label>
+                    <input type="text" name="title" id="id_title" required
+                           class="input-field" placeholder="Craft a compelling headline..."
+                           value="{{ form.title.value|default:'' }}"
+                           oninput="updateCharacterCounter('title-counter', this, 200)">
+                    <div class="flex justify-between items-center">
+                        {% if form.title.help_text %}
+                        <p class="text-xs text-light/40">{{ form.title.help_text }}</p>
+                        {% endif %}
+                        <div class="text-xs character-counter" id="title-counter">
+                            0/200
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Field -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-light/80">
+                        Featured Image
+                    </label>
+
+                    <div class="file-upload-zone p-6 text-center"
+                         id="upload-zone"
+                         onclick="document.getElementById('id_image').click()">
+                        <input type="file" name="image" id="id_image"
+                               class="hidden" accept="image/*">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 mx-auto rounded-lg bg-gradient-to-br from-highlight/20 to-highlight-light/20 flex items-center justify-center">
+                                <i class="fas fa-cloud-upload-alt text-highlight-light text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-light text-sm font-medium">Upload an image</p>
+                                <p class="text-light/40 text-xs mt-1">PNG, JPG up to 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Image Preview -->
+                    {% if form.instance.image %}
+                    <div class="mt-4 p-3 rounded-lg bg-white/5 fade-in">
+                        <p class="text-xs text-light/60 mb-2">Current Image:</p>
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ form.instance.image.url }}" alt="Current image"
+                                 class="w-20 h-20 object-cover rounded-lg">
+                            <div class="text-xs text-light/60">
+                                <p>This image will be replaced if you upload a new one.</p>
+                                <button type="button"
+                                        onclick="document.getElementById('id_image').click()"
+                                        class="mt-1 text-highlight-light hover:text-highlight font-medium text-xs">
+                                    Change Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div id="image-preview" class="hidden mt-3 fade-in">
+                        <p class="text-xs text-light/60 mb-2">Preview:</p>
+                        <img id="preview-image" class="w-20 h-20 object-cover rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Category Field -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-light/80">
+                        Category
+                    </label>
+                    <select name="category" id="id_category" required class="input-field">
+                        <option value="">Select a category...</option>
+                        {% for category in form.category.field.queryset %}
+                        <option value="{{ category.id }}"
+                                {% if form.category.value == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Content Field -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-light/80">
+                        Story Content
+                    </label>
+                    <textarea name="content" id="id_content" required
+                              class="input-field" placeholder="Begin your story here..."
+                              oninput="updateCharacterCounter('content-counter', this, 10000)">{{ form.content.value|default:'' }}</textarea>
+                    <div class="flex justify-between items-center">
+                        {% if form.content.help_text %}
+                        <p class="text-xs text-light/40">{{ form.content.help_text }}</p>
+                        {% endif %}
+                        <div class="text-xs character-counter" id="content-counter">
+                            0/10000
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-white/5">
+                    <button type="submit"
+                            class="btn-primary flex-1 flex items-center justify-center space-x-2">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                        <span>{% if form.instance.pk %}Update Story{% else %}Publish Story{% endif %}</span>
+                    </button>
+                    <a href="{% url 'articles:article_list' %}"
+                       class="btn-secondary flex-1 text-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+            <!-- Tips & Guidelines -->
+            <div class="mt-8 space-y-4">
+                <!-- Writing Tips -->
+                <div class="glass-card p-4">
+                    <h3 class="font-medium text-light mb-3 flex items-center space-x-2">
+                        <i class="fas fa-lightbulb text-highlight-light text-sm"></i>
+                        <span>Writing Tips</span>
+                    </h3>
+                    <ul class="space-y-2 text-xs text-light/60">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>Start with a hook to grab attention</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>Use short paragraphs for readability</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>Include personal experiences</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>End with a thought-provoking conclusion</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Community Guidelines -->
+                <div class="glass-card p-4">
+                    <h3 class="font-medium text-light mb-3 flex items-center space-x-2">
+                        <i class="fas fa-users text-highlight-light text-sm"></i>
+                        <span>Guidelines</span>
+                    </h3>
+                    <ul class="space-y-2 text-xs text-light/60">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>Respect diverse opinions</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>Provide proper attribution</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>No hate speech or discrimination</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-highlight-light">•</span>
+                            <span>Ensure content is original</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Moderation Note -->
+                {% if not form.instance.pk %}
+                <div class="glass-card p-4 border-l-2 border-highlight/50">
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-info-circle text-highlight-light text-sm mt-0.5"></i>
+                        <div>
+                            <h4 class="font-medium text-light text-sm mb-1">Moderation Process</h4>
+                            <p class="text-light/60 text-xs">
+                                All new stories undergo review to ensure they meet community standards.
+                                This usually takes less than 24 hours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Character counter
+        function updateCharacterCounter(counterId, element, maxLength) {
+            const counter = document.getElementById(counterId);
+            const length = element.value.length;
+            counter.textContent = `${length}/${maxLength}`;
+
+            counter.classList.remove('warning', 'danger');
+            if (length > maxLength * 0.8) {
+                counter.classList.add('warning');
+            }
+            if (length > maxLength * 0.9) {
+                counter.classList.add('danger');
+            }
+        }
+
+        // File upload preview
+        document.getElementById('id_image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('image-preview');
+                    const img = document.getElementById('preview-image');
+                    img.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    preview.classList.add('fade-in');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('id_image');
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        });
+
+        // Initialize counters
+        document.addEventListener('DOMContentLoaded', function() {
+            const titleField = document.getElementById('id_title');
+            const contentField = document.getElementById('id_content');
+
+            if (titleField) updateCharacterCounter('title-counter', titleField, 200);
+            if (contentField) updateCharacterCounter('content-counter', contentField, 10000);
+
+            // Add ripple effect to buttons
+            document.querySelectorAll('.btn-primary').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.3);
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+
+                    this.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add ripple animation style
+            if (!document.querySelector('#ripple-style')) {
+                const style = document.createElement('style');
+                style.id = 'ripple-style';
+                style.textContent = `
+                    @keyframes ripple {
+                        to {
+                            transform: scale(4);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+
+        // Form submission
+        document.getElementById('article-form').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalHtml = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+            submitBtn.disabled = true;
+
+            // Re-enable button if form submission fails
+            window.addEventListener('pageshow', function() {
+                submitBtn.innerHTML = originalHtml;
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Auto-save draft (optional feature)
+        let autoSaveTimer;
+        document.getElementById('article-form').addEventListener('input', function() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                // This would be an AJAX call to save draft in a real implementation
+                console.log('Auto-save triggered');
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

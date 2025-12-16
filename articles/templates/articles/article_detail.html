@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} | Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#0a0a0a',
+                        'secondary': '#1a1a1a',
+                        'accent': '#3a3a3a',
+                        'light': '#f5f5f5',
+                        'highlight': '#8b5cf6',
+                        'highlight-light': '#a78bfa',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e5e5e5;
+            min-height: 100vh;
+        }
+
+        .container-narrow {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+        }
+
+        .gradient-border {
+            position: relative;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 17px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(255, 255, 255, 0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn-primary:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end);
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .text-balance {
+            text-wrap: balance;
+        }
+
+        .highlight-code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .tab-active {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .text-stroke {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.1);
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 border-b border-white/5 bg-primary/95 backdrop-blur-md">
+        <div class="container-narrow px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <a href="{% url 'articles:article_list' %}" class="flex items-center space-x-3 group">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center">
+                            <i class="fas fa-arrow-left text-white text-sm"></i>
+                        </div>
+                        <span class="text-light/80 group-hover:text-light transition-colors">Back to Stories</span>
+                    </a>
+
+                    <div class="hidden md:flex items-center space-x-6">
+                        <a href="#" class="text-light/60 hover:text-light transition-colors text-sm font-medium">Trending</a>
+                        <a href="#" class="text-light/60 hover:text-light transition-colors text-sm font-medium">Latest</a>
+                        <a href="#" class="text-light/60 hover:text-light transition-colors text-sm font-medium">Collections</a>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center text-white font-medium text-sm">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <span class="text-light text-sm font-medium hidden md:inline">{{ user.username }}</span>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'users:login' %}?next={{ request.path }}"
+                       class="btn-primary text-sm">
+                        Sign In
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-narrow px-6 py-8">
+        <!-- Article Header -->
+        <div class="mb-12 fade-in-section">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center text-white font-medium">
+                        {{ article.author.username|first|upper }}
+                    </div>
+                    <div>
+                        <div class="text-light font-medium">{{ article.author.username }}</div>
+                        <div class="text-light/40 text-sm">{{ article.created_at|date:"M j, Y · g:i A" }}</div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated and user.role in "admin superadmin" %}
+                <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/5">
+                        <i class="fas fa-eye text-light/40 text-xs"></i>
+                        <span class="text-light/60 text-sm">{{ article.views|default:"0" }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-light mb-6 leading-tight text-balance">
+                {{ article.title }}
+            </h1>
+
+            <div class="flex flex-wrap items-center gap-3 mb-8">
+                <span class="px-3 py-1.5 rounded-full bg-gradient-to-r from-highlight/20 to-highlight-light/20 text-highlight-light text-sm font-medium">
+                    {{ article.category|default:"General" }}
+                </span>
+                <span class="text-light/40 text-sm">•</span>
+                <span class="text-light/40 text-sm">{{ article.created_at|timesince }} ago</span>
+                <span class="text-light/40 text-sm">•</span>
+                <span class="text-light/40 text-sm">{{ article.content|wordcount }} words</span>
+            </div>
+        </div>
+
+        <!-- Article Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-3 space-y-8">
+                <!-- Hero Image -->
+                {% if article.image %}
+                <div class="gradient-border overflow-hidden mb-8 fade-in-section">
+                    <img src="{{ article.image.url }}" alt="{{ article.title }}"
+                         class="w-full h-[400px] object-cover rounded-[16px] hover:scale-[1.02] transition-transform duration-500">
+                </div>
+                {% endif %}
+
+                <!-- Article Content -->
+                <article class="glass-card p-8 md:p-10 fade-in-section">
+                    <div class="prose prose-invert max-w-none">
+                        <div class="text-light/80 leading-relaxed space-y-6">
+                            {{ article.content|linebreaks }}
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="mt-10 pt-8 border-t border-white/5">
+                        <div class="flex flex-wrap gap-2">
+                            {% for tag in article.tags.all %}
+                            <span class="px-3 py-1.5 rounded-full bg-white/5 text-light/60 text-sm hover:bg-white/10 transition-colors cursor-pointer">
+                                #{{ tag.name }}
+                            </span>
+                            {% empty %}
+                            <span class="px-3 py-1.5 rounded-full bg-white/5 text-light/60 text-sm">
+                                {{ article.category|default:"General" }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Comments Section -->
+                <div class="glass-card p-8 md:p-10 fade-in-section">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h2 class="text-2xl font-bold text-light mb-2">Discussion</h2>
+                            <p class="text-light/40">Share your perspective</p>
+                        </div>
+                        <div class="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-highlight/10">
+                            <i class="fas fa-comment text-highlight-light text-sm"></i>
+                            <span class="text-light font-medium">{{ comments.count }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Comments List -->
+                    <div class="space-y-6 mb-8">
+                        {% for comment in comments %}
+                        <div class="p-5 rounded-xl bg-white/3 hover:bg-white/5 transition-colors fade-in-section">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center text-white text-sm font-medium">
+                                        {{ comment.user.username|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="text-light font-medium">{{ comment.user.username }}</div>
+                                        <div class="text-light/40 text-xs">{{ comment.created_at|timesince }} ago</div>
+                                    </div>
+                                </div>
+
+                                {% if user.is_authenticated and user == comment.user or user.role in "admin superadmin" %}
+                                <form method="post" action="{% url 'articles:article_detail' article.slug %}">
+                                    {% csrf_token %}
+                                    <button type="submit" name="delete_comment" value="{{ comment.id }}"
+                                            class="text-light/40 hover:text-red-400 transition-colors p-1">
+                                        <i class="fas fa-trash text-xs"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            <p class="text-light/70 leading-relaxed">{{ comment.text }}</p>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-12">
+                            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-comment-slash text-light/30 text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-medium text-light mb-2">No comments yet</h3>
+                            <p class="text-light/40 mb-6">Start the conversation</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Add Comment Form -->
+                    {% if user.is_authenticated %}
+                    <div class="gradient-border p-6 fade-in-section">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center">
+                                <i class="fas fa-edit text-white text-sm"></i>
+                            </div>
+                            <span class="text-light font-medium">Add your comment</span>
+                        </div>
+                        <form method="post" class="space-y-4">
+                            {% csrf_token %}
+                            <textarea name="text" required rows="4"
+                                      class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-light placeholder-light/30 focus:outline-none focus:border-highlight/50 transition-colors"
+                                      placeholder="Share your thoughts..."></textarea>
+                            <div class="flex justify-end">
+                                <button type="submit" name="add_comment"
+                                        class="btn-primary px-6">
+                                    Post Comment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="gradient-border p-8 text-center fade-in-section">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lock-open text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-medium text-light mb-2">Join the conversation</h3>
+                        <p class="text-light/40 mb-6 max-w-md mx-auto">
+                            Sign in to share your thoughts and connect with other readers
+                        </p>
+                        <a href="{% url 'users:login' %}?next={% url 'articles:article_detail' article.slug %}"
+                           class="btn-primary inline-block">
+                            Sign In to Comment
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Actions Card -->
+                <div class="glass-card p-6 fade-in-section">
+                    <h3 class="text-lg font-semibold text-light mb-6">Engage</h3>
+
+                    <!-- Rating -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-light/60 text-sm">Rating</span>
+                            <div class="px-2 py-1 rounded bg-highlight/20 text-highlight-light text-sm font-medium">
+                                {{ article.rating|floatformat:1 }}/5
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <a href="{% url 'articles:like_article' article.slug %}"
+                               class="flex-1 py-3 rounded-lg flex flex-col items-center justify-center space-y-1 hover:bg-white/5 transition-colors {% if user_rating == 1 %}bg-highlight/10 text-highlight-light{% else %}bg-white/5 text-light/60{% endif %}">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span class="text-sm font-medium">{{ likes_count }}</span>
+                            </a>
+                            <a href="{% url 'articles:dislike_article' article.slug %}"
+                               class="flex-1 py-3 rounded-lg flex flex-col items-center justify-center space-y-1 hover:bg-white/5 transition-colors {% if user_rating == -1 %}bg-red-500/10 text-red-400{% else %}bg-white/5 text-light/60{% endif %}">
+                                <i class="fas fa-thumbs-down"></i>
+                                <span class="text-sm font-medium">{{ dislikes_count }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Bookmark -->
+                    <div class="mb-6">
+                        {% if user.is_authenticated %}
+                        {% if is_favorite %}
+                        <a href="{% url 'favorites:remove' article.id %}"
+                           class="w-full py-3 rounded-lg flex items-center justify-center space-x-2 bg-highlight/10 text-highlight-light hover:bg-highlight/20 transition-colors">
+                            <i class="fas fa-bookmark"></i>
+                            <span>Bookmarked</span>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'favorites:add' article.id %}"
+                           class="w-full py-3 rounded-lg flex items-center justify-center space-x-2 bg-white/5 text-light/60 hover:bg-white/10 hover:text-light transition-colors">
+                            <i class="far fa-bookmark"></i>
+                            <span>Bookmark</span>
+                        </a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Share -->
+                    <div>
+                        <h4 class="text-light/60 text-sm mb-3">Share</h4>
+                        <div class="flex space-x-2">
+                            <a href="#" class="flex-1 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">
+                                <i class="fab fa-twitter text-light/60"></i>
+                            </a>
+                            <a href="#" class="flex-1 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">
+                                <i class="fas fa-link text-light/60"></i>
+                            </a>
+                            <a href="#" class="flex-1 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center">
+                                <i class="fas fa-share text-light/60"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="glass-card p-6 fade-in-section">
+                    <h3 class="text-lg font-semibold text-light mb-6">Stats</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-light mb-1">{{ article.rating|floatformat:1 }}</div>
+                            <div class="text-light/40 text-xs">Rating</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-light mb-1">{{ likes_count }}</div>
+                            <div class="text-light/40 text-xs">Likes</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-light mb-1">{{ dislikes_count }}</div>
+                            <div class="text-light/40 text-xs">Dislikes</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-light mb-1">{{ rating_total }}</div>
+                            <div class="text-light/40 text-xs">Total</div>
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated and user_rating != 0 %}
+                    <div class="mt-6 p-3 rounded-lg bg-highlight/10 border border-highlight/20">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-6 h-6 rounded bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center">
+                                <i class="fas fa-star text-white text-xs"></i>
+                            </div>
+                            <span class="text-light text-sm">
+                                You {% if user_rating == 1 %}liked{% else %}disliked{% endif %} this
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Author Actions -->
+                {% if user.is_authenticated and user == article.author or user.role in "admin superadmin" %}
+                <div class="glass-card p-6 fade-in-section">
+                    <h3 class="text-lg font-semibold text-light mb-6">Actions</h3>
+                    <div class="space-y-3">
+                        <a href="{% url 'articles:article_edit' article.slug %}"
+                           class="w-full py-3 rounded-lg flex items-center justify-center space-x-2 bg-white/5 text-light hover:bg-white/10 transition-colors">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit</span>
+                        </a>
+                        <a href="{% url 'articles:article_delete' article.slug %}"
+                           class="w-full py-3 rounded-lg flex items-center justify-center space-x-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
+                            <i class="fas fa-trash"></i>
+                            <span>Delete</span>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Explore Card -->
+                <div class="glass-card p-6 fade-in-section">
+                    <h3 class="text-lg font-semibold text-light mb-6">Explore</h3>
+                    <div class="space-y-4">
+                        <a href="{% url 'articles:article_list' %}"
+                           class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                            <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center group-hover:bg-highlight/20 transition-colors">
+                                <i class="fas fa-newspaper text-light/60 group-hover:text-highlight-light"></i>
+                            </div>
+                            <div>
+                                <div class="text-light font-medium text-sm">All Stories</div>
+                                <div class="text-light/40 text-xs">Browse collection</div>
+                            </div>
+                        </a>
+
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'favorites:list' %}"
+                           class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                            <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center group-hover:bg-highlight/20 transition-colors">
+                                <i class="fas fa-bookmark text-light/60 group-hover:text-highlight-light"></i>
+                            </div>
+                            <div>
+                                <div class="text-light font-medium text-sm">Bookmarks</div>
+                                <div class="text-light/40 text-xs">Saved stories</div>
+                            </div>
+                        </a>
+
+                        <a href="{% url 'articles:article_create' %}"
+                           class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/5 transition-colors group">
+                            <div class="w-8 h-8 rounded bg-white/5 flex items-center justify-center group-hover:bg-highlight/20 transition-colors">
+                                <i class="fas fa-pen text-light/60 group-hover:text-highlight-light"></i>
+                            </div>
+                            <div>
+                                <div class="text-light font-medium text-sm">Write Story</div>
+                                <div class="text-light/40 text-xs">Share your knowledge</div>
+                            </div>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 border-t border-white/5 py-12">
+        <div class="container-narrow px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 rounded bg-gradient-to-br from-highlight to-highlight-light"></div>
+                        <span class="text-xl font-bold text-light">Nexus</span>
+                    </div>
+                    <p class="text-light/40 text-sm max-w-md">
+                        Where ideas converge and stories unfold. A minimalist platform for meaningful discussions.
+                    </p>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="text-light/40 hover:text-light transition-colors text-sm">About</a>
+                    <a href="#" class="text-light/40 hover:text-light transition-colors text-sm">Privacy</a>
+                    <a href="#" class="text-light/40 hover:text-light transition-colors text-sm">Terms</a>
+                    <a href="#" class="text-light/40 hover:text-light transition-colors text-sm">Contact</a>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-white/5 text-center">
+                <p class="text-light/30 text-sm">
+                    © 2024 Nexus. Built with Django & Tailwind CSS.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Action Button -->
+    <a href="{% url 'articles:article_list' %}"
+       class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-gradient-to-br from-highlight to-highlight-light flex items-center justify-center text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 z-40">
+        <i class="fas fa-home"></i>
+    </a>
+
+    <script>
+        // Fade in animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeSections = document.querySelectorAll('.fade-in-section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            fadeSections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // Button ripple effect
+            document.querySelectorAll('.btn-primary').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const x = e.clientX - this.getBoundingClientRect().left;
+                    const y = e.clientY - this.getBoundingClientRect().top;
+
+                    const ripple = document.createElement('span');
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.3);
+                        width: 100px;
+                        height: 100px;
+                        margin-top: -50px;
+                        margin-left: -50px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+
+                    this.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+
+                    // Handle actual navigation
+                    setTimeout(() => {
+                        if (this.tagName === 'A') {
+                            window.location.href = this.href;
+                        }
+                    }, 300);
+                });
+            });
+
+            // Add CSS for ripple
+            if (!document.querySelector('#ripple-styles')) {
+                const style = document.createElement('style');
+                style.id = 'ripple-styles';
+                style.textContent = `
+                    @keyframes ripple {
+                        0% { transform: scale(0); opacity: 1; }
+                        100% { transform: scale(4); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId !== '#') {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                });
+            });
+
+            // Update article views (simulated)
+            if (window.location.href.indexOf('article') > -1) {
+                setTimeout(() => {
+                    // In a real app, this would be an API call
+                    console.log('Article view recorded');
+                }, 2000);
+            }
+        });
+
+        // Progressive enhancement for older browsers
+        if (!('IntersectionObserver' in window)) {
+            document.querySelectorAll('.fade-in-section').forEach(section => {
+                section.classList.add('visible');
+            });
+        }
+    </script>
+</body>
+</html>

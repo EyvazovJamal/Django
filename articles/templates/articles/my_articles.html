@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>My Articles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-10">
+
+<h1 class="text-3xl font-bold mb-8">📝 My Articles</h1>
+
+{% if articles %}
+<div class="space-y-4">
+    {% for article in articles %}
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex justify-between items-center">
+        <div>
+            <h2 class="text-xl font-semibold">{{ article.title }}</h2>
+            <p class="text-sm text-gray-400">
+                {{ article.created_at|date:"d M Y H:i" }}
+            </p>
+        </div>
+
+        <!-- Status -->
+        <div class="flex items-center space-x-4">
+            {% if article.status == "pending" %}
+            <span class="px-4 py-2 rounded bg-yellow-500 text-yellow-900 font-semibold">
+                ⏳ Pending
+            </span>
+            {% elif article.status == "approved" %}
+            <span class="px-4 py-2 rounded bg-green-500 text-green-900 font-semibold">
+                ✅ Approved
+            </span>
+            {% elif article.status == "rejected" %}
+            <span class="px-4 py-2 rounded bg-red-500 text-red-900 font-semibold">
+                ❌ Rejected
+            </span>
+            {% if article.status == "rejected" and article.moderation_comment %}
+            <div class="mt-2 text-sm text-red-300">
+                Reason: {{ article.moderation_comment }}
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <!-- View -->
+            <a href="{% url 'articles:article_detail' article.slug %}"
+               class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                Open
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-gray-400">You haven’t written any articles yet.</p>
+{% endif %}
+
+</body>
+</html>
